@@ -1,0 +1,15 @@
+ {
+     "presets": [
+         [
+             "@babel/preset-env",
+         ]
+     ],
+     "plugins": [
+         [
+             "@babel/plugin-transform-runtime",
+             {
+                 "corejs": 2 // 按需运行时转化
+             }
+         ]
+     ],
+ }
