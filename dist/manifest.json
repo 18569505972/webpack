@@ -1,8 +1,0 @@
-{
-  "main.js": "http:localhost:8888/main.a25bc6dd.js",
-  "runtime.js": "http:localhost:8888/runtime.a25bc6dd.js",
-  "vendors~main.js": "http:localhost:8888/vendors~main.a25bc6dd.js",
-  "fonts/V100020.TTF": "http:localhost:8888/fonts/V100020.76ffc9b.TTF",
-  "images/bg.jpg": "http:localhost:8888/images/bg.f2779e7.jpg",
-  "index.html": "http:localhost:8888/index.html"
-}

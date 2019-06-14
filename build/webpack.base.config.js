@@ -29,21 +29,6 @@ module.exports = (mode) => {
                 loader: "babel-loader",
                 include: /src/
             }, {
-                test: /\.scss$/,
-                use: [
-                    //devMode=='dev' ? '' : MiniCssExtractPlugin.loader,
-                    "css-loader",
-                    {
-                        loader: "postcss-loader",
-                        options: {
-                            plugins: [
-                                require("autoprefixer")
-                            ]
-                        }
-                    },
-                    "sass-loader"
-                ]
-            }, {
                 test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
                 loader: 'url-loader',
                 options: {

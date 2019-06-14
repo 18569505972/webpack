@@ -4,8 +4,9 @@
   "description": "webpack环境配置",
   "private": true,
   "scripts": {
-    "build": "webpack --progress --display-chunks --display-error-details --profile --json > compilation-stats.json --config ./build/webpack.prod.config.js",
-    "dev": "node ./build/devServer.js"
+    "build": "webpack --progress --display-chunks --display-error-details --config ./build/webpack.prod.config.js",
+    "dev": "node ./build/devServer.js",
+    "statistics": "webpack --progress --profile --json > compilation-stats.json --config ./build/webpack.prod.config.js"
   },
   "repository": {
     "type": "git",
@@ -48,5 +49,13 @@
   },
   "sideEffects": [
     "*.scss"
+  ],
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "last 10 Chrome versions",
+    "last 5 Firefox versions",
+    "Safari >= 6",
+    "ie > 8"
   ]
 }

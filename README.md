@@ -45,7 +45,7 @@ output:{
 模块配置
 ### noParse
 略过解析某类文件。
-### loader
+### 常用loader
 作用：webpack只能解释编译js和json文件，所以需要配置loader去处理vue、jsx、css、img、字体、视频、语音等格式的文件，将其转换为JavaScript。  
 #### 必须属性
 test：匹配被转换文件的格式。  
@@ -56,8 +56,26 @@ style-loader：使用style标签将css-loader内部样式注入到我们的HTML�
 #### postcss-loader
 配合autoprefixer插件用于处理浏览器前缀。
 #### sass-loader node-sass
-node-sass把sass编译成css,sass-loader 是webpack的一个loader。webpack中二者结合实现对sass的转化。
-#### html-loader
+node-sass把sass编译成css,sass-loader 是webpack的一个loader。webpack中二者结合实现对sass的转化。再配合css-loader将css样式转换为js模块。
+```
+{
+    test: /\.scss$/,
+    use: [
+        "css-loader",
+        {
+            loader: "postcss-loader",
+            options: {
+                plugins: [
+                    require("autoprefixer")
+                ]
+            }
+        },
+        "sass-loader"
+    ]
+}
+```
+#### less-loader
+实现less到css转化，再配合css-loader将css样式转换为js模块。
 #### url-loader、file-loader
 name参数:将文件输入到指定地址，\[name\]代表文件名，\[hash:7\]代表7位hash，\[ext\]代表文件扩展名。     
 limt:表示文件大小限制（单位byte），小于指定值的文件以file-loader进行base64转码打包。
@@ -91,18 +109,171 @@ rules:[
     include: /src/            // 只转化src目录下js文件
 },
 ```
+#### worker-loader
+将js文件注册为Web Worker。
+```
+{
+    test: /\.worker\.js$/,
+    use: { loader: 'worker-loader' }
+}
+```
 ## plugin
 各种各样的插件主要配合webpack对打包项目进行打包优化、资源管理、注入环境变量。
+### 常用插件
+### HtmlWebpackPlugin
+根据模板生成，含有包文件的html5文档。
+```
+new htmlWebpackPlugin({
+    inject: 'body',                           // script引入位置
+    hash: false,             // 为html引入的打包文件，添加请求参数hash，避免缓存
+    template: config.build.entryTemplate,     // 模板文件
+    filename: 'index.html',                   // 生成html文件名
+    chunksSortMode: 'dependency',             // script包引入顺序
+    minify: true                              // 线上环境对生成html文件进行压缩
+})
+```
 ### mini-css-extract-plugin
-此插件将CSS提取到单独的文件中。它为每个包含CSS的JS文件创建一个CSS文件。  
+此插件将CSS提取到单独的文件中。它为每个包含CSS的JS文件创建一个CSS文件。可打包异步加载的css模块。（不支持开发环境HRM，建议用于线上环境）
+```
+{
+    entry: {
+       foo: path.resolve(__dirname, 'src/foo'),
+        bar: path.resolve(__dirname, 'src/bar')
+    },
+    module: {
+        rules:[
+            {
+                test: /\.scss$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    "css-loader",
+                    "sass-loader"
+                ]
+
+            }
+        ]
+    },
+    optimization:{
+        splitChunks:{
+            cacheGroups:{
+                styles: {
+                    name: 'styles',       // 提取所有css文件到styles
+                    test: /\.css$/,
+                    chunks: 'all',
+                    enforce: true,
+                },
+                // 多入口时动态打包多个对应css文件
+                fooStyles: {
+                    name: 'foo',
+                    test: (m,c,entry = 'foo') => m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
+                    chunks: 'all',
+                    enforce: true
+                },
+                barStyles: {
+                    name: 'bar',
+                    test: (m,c,entry = 'bar') => m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
+                    chunks: 'all',
+                    enforce: true
+                }
+            }
+        }
+    },
+    plugins:[
+         new MiniCssExtractPlugin({
+            filename: '[name].[hash].css',       // css块名
+            chunkFilename: '[id].[hash].css'     // 异步加载的css块名
+        })
+    ]
+}
+```
+### SplitChunksPlugin
+自动拆分代码块代码，提取第三方插件以及重复使用的模块，优化按需加载和页面初始化请求数。
+```
+optimization: {
+    splitChunks: {
+        /* 
+        all异步和同步都可以分离。
+        async 表示对动态（异步）导入的模块进行分离。
+        initial 表示对初始化值进行分离优化。
+        */
+        chunks: 'all',  
+        minSize: 30000, //chunk的大小得大于30kb，避免生成vendor过多，发起过多请求
+        maxSize: 0,
+        minChunks: 1,  // 在分割之前，这个代码块最小应该被引用的次数
+        maxAsyncRequests: 5, //按需加载代码块最大并行chunk小于等于5，防止请求过多
+        maxInitialRequests: 3,  //初始html内代码块小于等于3，减少初始化请求
+        automaticNameDelimiter: '~',  // 打包分隔符
+        name: true,                   // 根据切割之前的代码块和缓存组键值(key)自动分配命名
+        cacheGroups: {                // 缓存组
+            vendors: {
+                test: /[\\/]node_modules[\\/]/,     // 提取node_modules模块到vendors
+                priority: -10                       // 权重
+            },
+            styles: {
+                name: 'styles',                    // 提取所有css文件到styles
+                test: /\.css$/,
+                chunks: 'all',
+                enforce: true,
+                priority: -11
+            },
+            default: {                 // 将至少有两个chunk引入的模块进行拆分
+                minChunks: 2,
+                priority: -20,
+                reuseExistingChunk: true
+            }
+        }
+    }
+}
+```
+### runtimeChunkPlugin
+配合SplitChunksPlugin分离出运行时文件。
+```
+/**
+ * name: entrypoint => `runtime~${entrypoint.name}`|multiple|true为每个入口chunk，生成runtime
+ * name: 'runtime'|single，多个入口chunk生成一个公共的runtime
+ * name: false，不生成runtime，入口runtime直接打包进入口chunk
+ */
+runtimeChunk: {
+    name: 'runtime'
+}
+```
+### NamedModulesPlugin（webpack内置插件）
+开发环境HRM热加载控制台显示修改模块相对路径及名称。
+```
+new webpack.NamedModulesPlugin()
+```
 ### ProvidePlugin（webpack内置插件）
-自动加载模块，而不必到处import或require。
+将模块绑定为全局模块，自动加载模块，而不必到处import或require。
+```
+new webpack.ProvidePlugin({
+    _: 'lodash'
+})
+```
 ### DefinePlugin （webpack内置插件）
 定义全局变量，项目内任何文件都可以访问到。
+```
+new webpack.DefinePlugin({
+    'process.env': JSON.stringify('development')
+}),
+```
 ### webpack-manifest-plugin
 用于生成源文件到打包文件的json映射文件的Webpack插件。
+```
+new ManifestPlugin()
+```
 ### webpack-dev-middleware
 创建本地express服务器，并且能够实时浏览器重新加载(live reloading)和热加载。
+### CopyWebpackPlugin
+复制文件或整个文件夹到某个目录。
+```
+new CopyWebpackPlugin([
+    {
+        from: "./static",     // 源文件或源目录
+        to: "./static",        // 目标目录
+        ignore: ['1.txt','2.md']  // 忽略文件
+    }
+])
+```
 ## devTool
 控制是否生成，以及如何生成 source map。
 ### 开发环境
@@ -114,9 +285,9 @@ rules:[
 ### development
 会将 process.env.NODE_ENV 的值设为 development。启用 NamedChunksPlugin 和 NamedModulesPlugin。
 ### production
-会将 process.env.NODE_ENV 的值设为 production。启用 FlagDependencyUsagePlugin, FlagIncludedChunksPlugin, ModuleConcatenationPlugin, NoEmitOnErrorsPlugin, OccurrenceOrderPlugin, SideEffectsFlagPlugin 和 UglifyJsPlugin。
+会将process.env.NODE_ENV 的值设为 production。启用 FlagDependencyUsagePlugin, FlagIncludedChunksPlugin, ModuleConcatenationPlugin, NoEmitOnErrorsPlugin, OccurrenceOrderPlugin, SideEffectsFlagPlugin 和 UglifyJsPlugin。
 ## resolve
-文件解析配置项。
+文件解析配置项。 
 ### alias
 设置路径别名。
 ```
