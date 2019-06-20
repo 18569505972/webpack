@@ -263,6 +263,11 @@ new ManifestPlugin()
 ```
 ### webpack-dev-middleware
 创建本地express服务器，并且能够实时浏览器重新加载(live reloading)和热加载。
+### open-browser-webpack-plugin
+启动本地服务后自动打开浏览器。
+```
+new OpenBrowserPlugin({ url: 'http://localhost:3000' })
+```
 ### CopyWebpackPlugin
 复制文件或整个文件夹到某个目录。
 ```

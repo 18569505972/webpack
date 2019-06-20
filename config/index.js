@@ -1,18 +1,22 @@
 var path = require('path')
-
+var hotMiddlewareScript = 'webpack-hot-middleware/client'
 module.exports = {
     build: {
-    	mode: 'production',
-    	entryTemplate: './src/index.html',
+        mode: 'production',
+        entryTemplate: './src/index.html',
         bundleRootPath: {
-            index: ['./webpack-hot-middleware/client?path=/__webpack_hmr&timeout=10000&reload=true','./src/singlePage/index.js']
+            index: './src/singlePage/index.js'
         },
         outputPath: path.resolve(__dirname, '../dist'),
         staticAssetsPath: 'http:localhost:8888/',
         devtool: 'none'
     },
     dev: {
-    	mode: 'development',
+        port: 8888,
+        mode: 'development',
+        bundleRootPath: {
+            index: ['webpack-hot-middleware/client.js?reload=true', './src/singlePage/index.js']
+        },
         staticAssetsPath: '/',
         devtool: '#cheap-module-eval-source-map'
     }

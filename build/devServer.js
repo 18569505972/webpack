@@ -1,6 +1,7 @@
 const express = require('express')
 const webpack = require('webpack')
 const path = require('path')
+const config = require('../config/index.js')
 const webpackDevMiddleware = require('webpack-dev-middleware')
 // express初始化
 const app = express();
@@ -14,11 +15,15 @@ app.use(webpackDevMiddleware(compiler, {
     publicPath: devConfig.output.publicPath, // 使用打包输出配置
 }));
 // 热重载
-app.use(require("webpack-hot-middleware")(compiler));
+app.use(require("webpack-hot-middleware")(compiler,{
+	log: false,
+    path: "/__what",
+    heartbeat: 2000
+}));
 app.get("*", (req, res, next) =>{
     res.sendFile(path.join(__dirname, "../dist"));
 })
 // 服务端口 8888.
-app.listen(8888, function() {
-    console.log('项目启动：http://localhost:8888\n');
+app.listen(config.dev.port, function() {
+    console.log(`项目启动：http://localhost:${config.dev.port}\n`);
 });
