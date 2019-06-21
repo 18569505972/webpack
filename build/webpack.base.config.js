@@ -24,7 +24,7 @@ module.exports = (mode) => {
             // 解析模块时优先搜索src
             modules: [path.resolve(__dirname, '../src'), "node_modules"],
             // 自动解析扩展，导入时可不带扩展名
-            extensions: ['*', '.vue', '.jsx', '.js']
+            extensions: ['*', '.vue', '.jsx', '.js', '.css']
         },
         module: {
             rules: [{

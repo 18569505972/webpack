@@ -15,7 +15,7 @@ module.exports = {
         port: 8888,
         mode: 'development',
         bundleRootPath: {
-            index: ['webpack-hot-middleware/client.js?reload=true', './src/singlePage/index.js']
+            index: ['webpack-hot-middleware/client.js?path=/__what&timeout=20000&reload=true', './src/singlePage/index.js']
         },
         staticAssetsPath: '/',
         devtool: '#cheap-module-eval-source-map'

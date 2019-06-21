@@ -262,7 +262,7 @@ new webpack.DefinePlugin({
 new ManifestPlugin()
 ```
 ### webpack-dev-middleware
-创建本地express服务器，并且能够实时浏览器重新加载(live reloading)和热加载。
+配合express创建本地服务器，并且能够与HotModuleReplacementPlugin、webpack-hot-middleware实时浏览器[热加载](#hotLoad)。
 ### open-browser-webpack-plugin
 启动本地服务后自动打开浏览器。
 ```
@@ -355,6 +355,7 @@ externals: {
 webpack --profile --json > compilation-stats.json
 ```
 生成有关于模块的统计数据的JSON文件。生成文件可以通过webpack可视化工具生成统计图表。
+## <div id="hotLoad">热加载</div>
 ## 依赖模快
 ```
 // 本地安装

@@ -6,3 +6,6 @@ console.log(arr)
 //let env = isDev?'开发环境':'线上环境'
 //console.log(des)
 testAlias()
+if(module.hot){
+  module.hot.accept();
+}
