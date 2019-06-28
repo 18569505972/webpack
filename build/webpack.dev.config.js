@@ -11,6 +11,7 @@ module.exports = merge(base('development'), {
         rules: [{
             test: /\.scss$/,
             use: [
+                "style-loader",
                 "css-loader",
                 {
                     loader: "postcss-loader",

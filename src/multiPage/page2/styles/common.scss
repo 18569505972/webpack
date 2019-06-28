@@ -5,6 +5,9 @@
 	src:url(../fonts/V100020.TTF)
 }
 body{
+	color: #F00;
+	font-family: 'myfont';
+	background:#000;
 	height: 100px;
 	width: 100%;
 	#app{
@@ -13,10 +16,16 @@ body{
 		background:#F00;
 		animation:appact 1s linear infinite;
 	}
+	.bg {
+		width: 100px;
+		height:200px;
+		background:url(../images/bg.jpg) 0 0 no-repeat;
+		background-size: 100% 100%;
+	}
 	.continue{
-		width: 220px;
-		height:329.5px;
-		background:url(../images/1.jpg) 0 0 no-repeat;
+		width: 100px;
+		height:50px;
+		background:url(../images/continue.png) 0 0 no-repeat;
 		background-size: 100% 100%;
 	}
 	@keyframes appact {

@@ -26,6 +26,7 @@ module.exports = (mode) => {
             // 自动解析扩展，导入时可不带扩展名
             extensions: ['*', '.vue', '.jsx', '.js', '.css']
         },
+        stats: 'errors-only',
         module: {
             rules: [{
                 test: /\.js$/,
