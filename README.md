@@ -238,7 +238,12 @@ runtimeChunk: {
 }
 ```
 ### NamedModulesPlugin（webpack内置插件）
-开发环境HRM热加载控制台显示修改模块相对路径及名称。
+开发环境HRM热加载控制台显示修改模块相对路径及名称。（mode为development默认开启）
+```
+new webpack.NamedModulesPlugin()
+```
+### NamedChunksPlugin（webpack内置插件）
+将webpack入口文件的入口执行模块ID改为文件名。（mode为development默认开启）
 ```
 new webpack.NamedModulesPlugin()
 ```
@@ -250,10 +255,10 @@ new webpack.ProvidePlugin({
 })
 ```
 ### DefinePlugin （webpack内置插件）
-定义全局变量，项目内任何文件都可以访问到。
+定义全局变量，项目内任何文件都可以访问到。（在mode为production或development的状态下，为了兼顾两个状态下的程序运行，webpack默认创建了一个全局变量process.env.NODE_ENV，值默认为mode值）。
 ```
 new webpack.DefinePlugin({
-    'process.env': JSON.stringify('development')
+    'process.env.NODE_ENV）': JSON.stringify('development')
 }),
 ```
 ### webpack-manifest-plugin
@@ -262,7 +267,8 @@ new webpack.DefinePlugin({
 new ManifestPlugin()
 ```
 ### webpack-dev-middleware
-配合express创建本地服务器，并且能够与HotModuleReplacementPlugin、webpack-hot-middleware实时浏览器[热加载](#hotLoad)。
+主要实现对文件的监控和编译，配合express创建本地服务器，与HotModuleReplacementPlugin、webpack-hot-middleware实现实时浏览器[热加载](#hotLoad)。
+### HotModuleReplacementPlugin（webpack内置插件）
 ### open-browser-webpack-plugin
 启动本地服务后自动打开浏览器。
 ```
@@ -279,6 +285,13 @@ new CopyWebpackPlugin([
     }
 ])
 ```
+### NoEmitOnErrorsPlugin（webpack内置插件）
+编译碰到错误、warning，但是不停止编译。
+```
+new webpack.NoEmitOnErrorsPlugin()
+```
+### OccurrenceOrderPlugin（webpack内置插件）
+根据出现次数为每一个模块或者chunk设置id,经常使用的模块则会获取到较短的id(和前缀树类似)，这可以使id可预测并有效减少文件大小，建议使用在生产环境中。
 ## devTool
 控制是否生成，以及如何生成 source map。
 ### 开发环境
@@ -350,66 +363,83 @@ externals: {
     ]
 }
 ```
-### 生成统计数据文件
+### <div id="hotLoad">热重载</div>
+文件改动后，以最小的代价改变页面被改变的区域。尽可能保留改动文件前的页面状态。
+#### 本地服务与文件编译、监控
+主要通过express与webpack-dev-middleware实现。  
+```
+server.js  
+const express = require('express')
+const webpack = require('webpack')
+const path = require('path')
+const webpackDevMiddleware = require('webpack-dev-middleware')
+// express初始化
+const app = express();
+// 引入webpack开发配置文件
+const devConfig = require('./webpack.dev.config.js');
+// 生成编译器
+const compiler = webpack(devConfig);
+// 中间件配置
+app.use(webpackDevMiddleware(compiler, {
+    quiet: true,  //向控制台显示任何内容 
+    publicPath: path.resolve(__dirname, '../dist'), // 使用打包输出配置
+}));
+// 返回请求页面
+app.get("*", (req, res, next) =>{
+    res.sendFile(path.join(__dirname, "../dist"));
+})
+// 服务端口 8888.
+app.listen(config.dev.port, function() {
+
+```
+#### 热重载
+主要通过webpack-hot-middleware、HotModuleReplacementPlugin插件实现。  
+server.js
+```
+const express = require('express')
+const webpack = require('webpack')
+const path = require('path')
+const webpackDevMiddleware = require('webpack-dev-middleware')
+// express初始化
+const app = express();
+// 引入webpack开发配置文件
+const devConfig = require('./webpack.dev.config.js');
+// 生成编译器
+const compiler = webpack(devConfig);
+// 中间件配置
+app.use(webpackDevMiddleware(compiler, {
+    quiet: true,  //向控制台显示任何内容 
+    publicPath: path.resolve(__dirname, '../dist'), // 使用打包输出配置
+}));
+// 热重载
+app.use(require("webpack-hot-middleware")(compiler,{
+    log: false,
+    path: "/__what",
+    heartbeat: 2000
+}));
+// 返回请求页面
+app.get("*", (req, res, next) =>{
+    res.sendFile(path.join(__dirname, "../dist"));
+})
+// 服务端口 8888.
+app.listen(config.dev.port, function() {
+    console.log(`项目启动：http://localhost:${config.dev.port}\n`);
+});
+```
+webpack.dev.config.js  
+entry中client.js的参数为webpack-hot-middleware的配置项。也可直接在server.js的webpack-hot-middleware配置项中配置。
+```
+{
+    entry: ['webpack-hot-middleware/client.js?path=/__what&timeout=20000&reload=true', './src/index.js'],
+
+    plugins: [
+        new webpack.HotModuleReplacementPlugin(),
+    ]
+}
+```
+#### 生成统计数据文件
 ```
 webpack --profile --json > compilation-stats.json
 ```
 生成有关于模块的统计数据的JSON文件。生成文件可以通过webpack可视化工具生成统计图表。
-## <div id="hotLoad">热加载</div>
-## 依赖模快
-```
-// 本地安装
-cnpm install --save-dev webpack    
-// 安装webpack命令行  
-cnpm install webpack-cli --save-dev     
-cnpm install --save-dev webpack-dev-server 
-cnpm install --save-dev webpack-manifest-plugin 
-cnpm install --save-dev webpack-merge  合并公共配置  
-cnpm install --save lodash     
-cnpm install --save-dev style-loader css-loader sass-loader    
-cnpm install --save-dev url-loader  
-cnpm install --save-dev html-webpack-plugin   
-cnpm install clean-webpack-plugin --save-dev   
-cnpm install extract-text-webpack-plugin  --save-dev  
-cnpm install --save-dev uglifyjs-webpack-plugin
-cnpm install babel-loader babel-core --save-dev  
-cnpm install babel-preset-env --save-dev
-cnpm install --save babel-polyfill
-cnpm install babel-plugin-transform-runtime --save-dev  
-cnpm install --save babel-runtime  
-```
-## 配置步骤  
-### 1. 创建项目目录
-创建dist生成包目录和src开发目录，src下创建index.js入口文件
-### 2. 代码打包
-运行npx webpack或node_modules\.bin\webpack（npx仅支持node8.2+），dist生成打包文件main.js    
-### 3. 配置文件
-#### (1) 创建配置文件
-主目录创建webpack.config.js，启用配置文件npx webpack --config webpack.config.js  
-#### (2) css加载
-配置rulers，使用css-loader和style-loader加载css（注意依赖顺序，style-loader需放在前面）,less-loader加载less，sass-loader加载sass     
-#### (3) 打包生成css文件  
-配置plugins，style-loader默认在打包文件中添加style标签导入样式，使用extract-text-webpack-plugin插件生成独立css文件    
-#### (4) 图片、字体等资源加载
-配置rulers，使用url-loader加载引用资源（url-loader会将引入的图片编码，生成dataURl）      
-#### (5) 自动引入依赖包
-配置plugins，配置html-webpack-plugin，生成新模板，自动在模板中添加对生成包的引用      
-#### (6) 清空目标文件夹
-配置plugins，配置clean-webpack-plugin，打包前清空包文件夹      
-#### (7) 错误跟踪调试  
-配置devtool，开发环境配置为‘cheap-source-map’（开发环境‘cheap-module-eval-source-map’模式为最优配置，但仍存在bug，生产环境配置为‘source-map’）          
-#### (8) 创建本地服务    
-配置devServer，配置webpack-dev-server本地开发服务器，实现代码自动编译，浏览器实时刷新      
-#### (9)  babel语法转换器  
-babel-loader  
-babel-core  
-babel-preset-env   
-babel-polyfill：防止浏览器不支持 Promise/Object.assign/Array.from等还有性能问题  
-babel-plugin-transform-runtime：配合babel-polyfill开发环境使用  
-babel-runtime：配合babel-polyfill生产环境使用  
-#### (10)  
-#### (9) 生产与开发环境分离       
-
-
-
 

@@ -67,9 +67,6 @@ module.exports = merge(base('production'), {
     },
     plugins: [
         new cleanWebpackPlugin(), //打包前清理文件夹
-        new webpack.DefinePlugin({
-            'process.env': JSON.stringify('production')
-        }),
         new ManifestPlugin(),
         new MiniCssExtractPlugin({
             filename: '[name].[hash].css',
