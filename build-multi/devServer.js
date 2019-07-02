@@ -13,10 +13,6 @@ const compiler = webpack(devConfig);
 // 中间件配置
 app.use(webpackDevMiddleware(compiler, {
     stats: statsObj,
-    lazy: false,
-    watchOptions: {
-    	ignored: /node_modules/    // 忽略监听
-    },
     publicPath: devConfig.output.publicPath, // 使用打包输出配置
 }));
 // 热重载

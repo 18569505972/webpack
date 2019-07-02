@@ -237,15 +237,26 @@ runtimeChunk: {
     name: 'runtime'
 }
 ```
+### DllPlugin和DllReferencePlugin
+分离第三方库，在每次打包时只打包业务代码，不重新打包第三方库。提高构建、编译速度。（webpack4.0中用了splitPlugin进行线上打包的话，建议DllPlugin仅用于开发环境，两者同时使用会导致第三方库重复打包的问题）。    
+具体配置见：[dllPlugin编译优化](#dllPlugin)
 ### NamedModulesPlugin（webpack内置插件）
 开发环境HRM热加载控制台显示修改模块相对路径及名称。（mode为development默认开启）
 ```
 new webpack.NamedModulesPlugin()
+// 或者
+optimization: {
+    namedModules: true
+}
 ```
 ### NamedChunksPlugin（webpack内置插件）
 将webpack入口文件的入口执行模块ID改为文件名。（mode为development默认开启）
 ```
-new webpack.NamedModulesPlugin()
+new webpack.NamedChunksPlugin()
+// 或者
+optimization: {
+    namedChunks: true
+}
 ```
 ### ProvidePlugin（webpack内置插件）
 将模块绑定为全局模块，自动加载模块，而不必到处import或require。
@@ -289,6 +300,10 @@ new CopyWebpackPlugin([
 编译碰到错误、warning，但是不停止编译。
 ```
 new webpack.NoEmitOnErrorsPlugin()
+// 或者
+optimization: {
+    noEmitOnErrors: true
+}
 ```
 ### OccurrenceOrderPlugin（webpack内置插件）
 根据出现次数为每一个模块或者chunk设置id,经常使用的模块则会获取到较短的id(和前缀树类似)，这可以使id可预测并有效减少文件大小，建议使用在生产环境中。
@@ -315,6 +330,7 @@ resolve: {
     }
 }
 ```
+[参考链接](https://webpack.docschina.org/configuration/resolve/#resolve-alias)
 ### extensions
 自动解析指定扩展名文件。（数组中指定格式文件导入时可不带扩展名）。
 ```
@@ -322,6 +338,7 @@ resolve: {
     extensions: ['*', '.vue', '.jsx']
 }
 ```
+[参考链接](https://webpack.docschina.org/configuration/resolve/#resolve-extensions)
 ### modules
 解析模块时优先检索目录。
 ```
@@ -329,6 +346,7 @@ resolve: {
     modules: [path.resolve(__dirname, '../src'), "node_modules"]
 }
 ```
+[参考链接](https://webpack.docschina.org/configuration/resolve/#resolve-modules
 ## externals
 配置全局变量，防止将某些 import 的包(package)打包到 bundle中，而是在运行时(runtime)再去从外部获取这些扩展依赖。
 ```
@@ -336,19 +354,52 @@ externals: {
   jquery: 'jQuery'
 }
 ```
+[参考链接](https://webpack.docschina.org/configuration/externals/)
 ## performance
-控制webpack「资源和入口起点超过指定文件限制如何通知开发者。
+控制webpack资源和入口起点超过指定文件限制如何通知开发者。  
+[参考资料](https://webpack.docschina.org/configuration/performance/)
 ## 打包生成文件
 1、项目源码  
 2、引入第三方库（vendor）  
 3、运行时代码（runtime），主要包含处理模块间的链接和解析的代码。   
 4、文件映射（manifest），管理打包前和打包后文件之间的对应标识。
 ## 优化配置
+### optimization
+[参考资料](https://webpack.docschina.org/configuration/optimization/)
+#### optimization.minimize
+开启包压缩。（mode为production 模式下，这里默认是 true）
+```
+optimization: {
+    minimize: true
+}
+```
+#### optimization.noEmitOnErrors 
+报错时跳过生成，防止打出问题包。
+```
+optimization: {
+    noEmitOnErrors: true
+}
+```
+#### optimization.removeEmptyChunks
+打包chunk为空则删除chunk。
+```
+optimization: {
+    removeEmptyChunks: true
+}
+```
+#### optimization.mergeDuplicateChunks 
+合并相同chunk。
+```
+optimization: {
+    mergeDuplicateChunks: true
+}
+```
 ### tree-shaking
 #### 作用
 剔除打包代码中的无用exports模块。（webpack4默认对ESmodel引入的json模块进行未使用字段的tree-shaking处理）
 #### 副作用
-在导入时会执行特殊行为的代码，而不是仅仅暴露一个export或多个export。举例说明，例如polyfill，它影响全局作用域，并且通常不提供export；再比如使用类似css-loader并import一个CSS文件。
+在导入时会执行特殊行为的代码，而不是仅仅暴露一个export或多个export。举例说明，例如polyfill，它影响全局作用域，并且通常不提供export；再比如使用类似css-loader并import一个CSS文件。   
+会受到resolve.alias影响。  
 #### package.json
 ```
 // 所有代码无副作用
@@ -362,6 +413,56 @@ externals: {
          "*.css"
     ]
 }
+```
+### <div id="dllPlugin">编译优化</div>
+dll第三方链接库打包配置
+```
+webpack.dll.config.js
+
+module.exports = {
+    mode: 'development',
+    entry: {
+        // 第三方库
+        vendor: ['vue','vuex','vue-router','axios']
+    },
+    output: {
+        // 输出的动态链接库的文件名称，[name] 代表当前动态链接库的名称，
+        filename: '[name].dll.js',
+        // 生成库目录
+        path: path.resolve(__dirname, '../dist/dll'),
+        // library必须和后面dllplugin中的name一致
+        library: '[name]_dll_[hash]'
+    },
+    plugins: [
+        new cleanWebpackPlugin(), //打包前清理文件夹
+        new webpack.DllPlugin({
+            // 定义manifest链接库name字段名
+            name: '[name]_dll_[hash]',
+            // 定义manifest输出文件
+            path: path.resolve(__dirname, '../dist/dll', 'vendor.manifest.json')
+        })
+    ]
+}
+```
+添加dll文件映射，并以标签形式插入到生成的html文件中。
+```
+webpack.dev.config.js
+plugins:[
+    // 映射dll文件夹下的vendor.manifest.json
+    new webpack.DllReferencePlugin({
+        manifest: require(path.resolve(__dirname, '../dist/dll/vendor.manifest.json'))
+    }),
+    // 生成html页面
+    new htmlWebpackPlugin({
+        filename: 'index.html',
+        inject: true
+    }),
+    // 将文件插入htmlWebpackPlugin文件注入列表中
+    new AddAssetHtmlPlugin({
+        // html插入文件路径
+        filepath: require.resolve('../dist/dll/vendor.dll.js')
+    })
+]
 ```
 ### <div id="hotLoad">热重载</div>
 文件改动后，以最小的代价改变页面被改变的区域。尽可能保留改动文件前的页面状态。
@@ -437,9 +538,57 @@ entry中client.js的参数为webpack-hot-middleware的配置项。也可直接�
     ]
 }
 ```
-#### 生成统计数据文件
+### 生成统计数据文件
 ```
 webpack --profile --json > compilation-stats.json
 ```
-生成有关于模块的统计数据的JSON文件。生成文件可以通过webpack可视化工具生成统计图表。
+生成有关于模块的统计数据的JSON文件。生成文件可以通过webpack可视化工具生成统计图表。  
+[参考链接](https://webpack.docschina.org/api/stats/)
+### 日志管理
+[参考资料](https://webpack.docschina.org/configuration/stats/)
+```
+// webpackConfig为webpack配置项，stats参数包含构建信息
+// 通过回调函数和stats参数可以对控制台打印信息颗粒化控制
+webpack(webpackConfig, (err, stats) => {
+    if (err) {
+        console.error(err);
+        return;
+    }
+    console.log(stats.toString({
+        // 添加资源信息
+        assets: true,
+        // 对资源按指定的字段进行排序
+        // 你可以使用 `!field` 来反转排序。
+        assetsSort: "field",
+        // 添加构建日期和构建时间信息
+        builtAt: true,
+        // 添加缓存（但未构建）模块的信息
+        cached: false,
+        // 显示缓存的资源（将其设置为 `false` 则仅显示输出的文件）
+        cachedAssets: false,
+        // 添加 children 信息
+        children: false,
+        // 添加 chunk 信息（设置为 `false` 能允许较少的冗长输出）
+        chunks: false,
+        // 将构建模块信息添加到 chunk 信息
+        chunkModules: false,
+        // 添加 chunk 和 chunk merge 来源的信息
+        chunkOrigins: false,
+        // `webpack --colors` 等同于
+        colors: true,
+        // 显示每个模块到入口起点的距离(distance)
+        depth: false,
+        // 通过对应的 bundle 显示入口起点
+        entrypoints: false,
+        // 添加 --env information
+        env: false,
+        // 添加错误信息
+        errors: true,
+        // 添加错误的详细信息（就像解析日志一样）
+        errorDetails: true,
+        // 添加构建模块信息
+        modules: false
+    }));
+})
+```
 

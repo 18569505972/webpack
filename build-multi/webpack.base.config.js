@@ -10,7 +10,7 @@ module.exports = (mode) => {
     let devMode = mode !== 'production'?'dev':'build'
     return {
         context: path.resolve(__dirname, '..'),
-        entry: config[devMode].entryPath,
+        entry: config[devMode].bundleRootPath,
         output: {
             filename: '[name].[hash:8].js',
             chunkFilename: '[name].[hash:8].js',
@@ -26,6 +26,7 @@ module.exports = (mode) => {
             // 自动解析扩展，导入时可不带扩展名
             extensions: ['*', '.vue', '.jsx', '.js', '.css']
         },
+        stats: 'errors-only',
         module: {
             rules: [{
                 test: /\.js$/,

@@ -1,23 +1,41 @@
-var path = require('path')
-var hotMiddlewareScript = 'webpack-hot-middleware/client'
+var path = require('path') 
 module.exports = {
     build: {
+        // 当前运行环境
         mode: 'production',
-        entryTemplate: './src/index.html',
-        bundleRootPath: {
-            index: './src/singlePage/index.js'
+        // html模板
+        htmlTemplate: path.resolve(__dirname, '../src/index.html'),
+        // 打包入口
+        entryPath: {
+            index: path.resolve(__dirname, '../src/singlePage/index.js')
         },
-        outputPath: path.resolve(__dirname, '../dist'),
+        // 生成包目录
+        outputPath: path.resolve(__dirname, '../dist/bundle'),
+        // 静态资源路径
         staticAssetsPath: 'http:localhost:8888/',
+        // sourceMap模式
         devtool: 'none'
     },
     dev: {
+        // 本地服务端口号
         port: 8888,
+        // 当前运行环境
         mode: 'development',
-        bundleRootPath: {
-            index: ['webpack-hot-middleware/client.js?path=/__what&timeout=20000', './src/singlePage/index.js']
+        // 打包入口
+        entryPath: {
+            index: ['webpack-hot-middleware/client.js?path=/__what&timeout=20000', path.resolve(__dirname, '../src/singlePage/index.js')]
         },
+        // 静态资源路径
         staticAssetsPath: '/',
+        // sourceMap模式
         devtool: '#cheap-module-eval-source-map'
+    },
+    dll: {
+        // 链接库manifest
+        manifestPath: path.resolve(__dirname, '../dist/dll/vendor.manifest.json'),
+        // 链接库列表
+        dllList: ['lodash'],
+        // 链接库包目录
+        dllOutputPath: path.resolve(__dirname, '../dist/dll')
     }
 }
