@@ -1,5 +1,35 @@
 # webpack
 webpack环境配置
+# 项目启动
+```
+// 拉取远程库
+git clone git@github.com:18569505972/webpack.git
+
+// 下载依赖包
+cnpm install
+
+// 启动单页本地服务
+npm run dev
+
+// 创建单页链接库
+npm run dll
+
+// 单页打包
+npm run build
+
+// 启动多页本地服务
+npm run muldev
+
+// 创建多页链接库
+npm run muldll
+
+// 多页打包
+npm run mulbuild
+
+// 生成chunk统计json文件
+npm run statistics
+
+```
 # 基础概念
 ## context
 定义entry入口和HtmlWebpackPlugin插件绝对路径。
