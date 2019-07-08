@@ -1,7 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const cleanWebpackPlugin = require('clean-webpack-plugin')
-const config = require('../config/index.js')
+const config = require('../config/index-multi.js')
 module.exports = {
 	mode: 'development',
     entry: {
@@ -17,12 +17,12 @@ module.exports = {
     },
     plugins: [
         //打包前清理文件夹
-    	new cleanWebpackPlugin(),
+    	new cleanWebpackPlugin(), 
         new webpack.DllPlugin({
         	// 定义manifest链接库name字段名
             name: '[name]_dll_[hash]',
             // 定义manifest输出文件
-            path: path.resolve(__dirname, '../dist/dll', 'vendor.manifest.json')
+            path: path.resolve(__dirname, '../dist/multiDll', 'vendor.manifest.json')
         })
     ]
 }

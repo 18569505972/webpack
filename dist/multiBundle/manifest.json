@@ -1,0 +1,16 @@
+{
+  "common.css": "http:localhost:8888//css/common.d2e99091.css",
+  "common.js": "http:localhost:8888/js/common.d132d118.js",
+  "vendors~page1~page2.js": "http:localhost:8888/js/vendors~page1~page2.b2b64356.js",
+  "page1.css": "http:localhost:8888//css/page1.63c8dfef.css",
+  "page1.js": "http:localhost:8888/js/page1.2151f975.js",
+  "page2.css": "http:localhost:8888//css/page2.63c8dfef.css",
+  "page2.js": "http:localhost:8888/js/page2.e57ca847.js",
+  "runtime~page1.js": "http:localhost:8888/js/runtime~page1.0dc435c8.js",
+  "runtime~page2.js": "http:localhost:8888/js/runtime~page2.ea945d36.js",
+  "vendors~page2.js": "http:localhost:8888/js/vendors~page2.fb327e50.js",
+  "fonts/common.scss": "http:localhost:8888/fonts/V100020.76ffc9b.TTF",
+  "images/common.scss": "http:localhost:8888/images/1.144b9ca.jpg",
+  "page1.html": "http:localhost:8888/page1.html",
+  "page2.html": "http:localhost:8888/page2.html"
+}

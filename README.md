@@ -35,8 +35,8 @@ entry: () => new Promise((resolve) => resolve(['./main.js', './common.js']))
 ### output配置
 ```
 output:{
-	filename:'[name].[hash:8].js',  //输出包名,添加hash值
-    chunkFilename: '[name].[hash:8].js', // 异步加载模块输出名配置
+	filename:'[name].[chunkhash:8].js',  //输出包名,添加hash值
+    chunkFilename: '[name].[chunkhash:8].js', // 异步加载模块输出名配置
 	path:resolve(__dirname,'dist'),  //打包目录
 	publicPath:"http://static.com"  //静态资源域名，如图片url
 }
@@ -186,42 +186,47 @@ new htmlWebpackPlugin({
     ]
 }
 ```
+### optimize-css-assets-webpack-plugin
+优化css文件的输出，默认使用cssnano，其优化策略主要包括：摈弃重复的样式定义、砍掉样式规则中多余的参数、移除不需要的浏览器前缀等。[优化配置](#chunkBetter)
+### terser-webpack-plugin（webpack内置）
+优化压缩js（用terser-webpack-plugin替换掉uglifyjs-webpack-plugin解决uglifyjs不支持es6语法问题。）[自定义优化配置](#chunkBetter)
 ### SplitChunksPlugin
 自动拆分代码块代码，提取第三方插件以及重复使用的模块，优化按需加载和页面初始化请求数。
 ```
 optimization: {
     splitChunks: {
-        /* 
-        all异步和同步都可以分离。
-        async 表示对动态（异步）导入的模块进行分离。
-        initial 表示对初始化值进行分离优化。
-        */
-        chunks: 'all',  
+        chunks: 'all',
         minSize: 30000, //chunk的大小得大于30kb，避免生成vendor过多，发起过多请求
         maxSize: 0,
-        minChunks: 1,  // 在分割之前，这个代码块最小应该被引用的次数
+        minChunks: 1, // 在分割之前，这个代码块最小应该被引用的次数
         maxAsyncRequests: 5, //按需加载代码块最大并行chunk小于等于5，防止请求过多
-        maxInitialRequests: 3,  //初始html内代码块小于等于3，减少初始化请求
-        automaticNameDelimiter: '~',  // 打包分隔符
-        name: true,                   // 根据切割之前的代码块和缓存组键值(key)自动分配命名
-        cacheGroups: {                // 缓存组
+        maxInitialRequests: 3, //初始html内代码块小于等于3，减少初始化请求
+        automaticNameDelimiter: '~', // 打包分隔符
+        name: true, // 根据切割之前的代码块和缓存组键值(key)自动分配命名
+        cacheGroups: { // 缓存组
             vendors: {
-                test: /[\\/]node_modules[\\/]/,     // 提取node_modules模块到vendors
-                priority: -10                       // 权重
+                test: /[\\/]node_modules[\\/]/, // 提取node_modules模块到vendors
+                priority: -10 // 权重
             },
             styles: {
-                name: 'styles',                    // 提取所有css文件到styles
-                test: /\.css$/,
+                name: 'styles', // 提取所有css文件到styles
+                test: /\.s?css$/,
                 chunks: 'all',
                 enforce: true,
-                priority: -11
+                priority: -11,
             },
-            default: {                 // 将至少有两个chunk引入的模块进行拆分
+            default: { // 将至少有两个chunk引入的模块进行拆分
                 minChunks: 2,
                 priority: -20,
-                reuseExistingChunk: true
+                reuseExistingChunk: true  // 这个配置允许我们使用已经存在的代码块
             }
         }
+    },
+    // name: entrypoint => `runtime~${entrypoint.name}`|multiple|true为每个入口chunk，生成runtime
+    // name: 'runtime'|single，多个入口chunk生成一个公共的runtime
+    // name: false，不生成runtime，入口runtime直接打包进入口chunk
+    runtimeChunk: {
+        name: 'runtime'
     }
 }
 ```
@@ -258,8 +263,11 @@ optimization: {
     namedChunks: true
 }
 ```
+### HashedModuleIdsPlugin（webpack内置插件）
+根据模块的相对路径生成一个四位数的hash作为模块id。  
+作用：[线上缓存优化](#cache)
 ### ProvidePlugin（webpack内置插件）
-将模块绑定为全局模块，自动加载模块，而不必到处import或require。
+将模块绑定为全局模块，自动加载模块，而不必到处import或require，实现[全局模块内方法按需加载](#provide)。
 ```
 new webpack.ProvidePlugin({
     _: 'lodash'
@@ -305,8 +313,13 @@ optimization: {
     noEmitOnErrors: true
 }
 ```
-### OccurrenceOrderPlugin（webpack内置插件）
+### OccurrenceOrderPlugin（webpack内置插件，默认启用）
 根据出现次数为每一个模块或者chunk设置id,经常使用的模块则会获取到较短的id(和前缀树类似)，这可以使id可预测并有效减少文件大小，建议使用在生产环境中。
+```
+optimization: {
+    occurrenceOrder: true
+}
+```
 ## devTool
 控制是否生成，以及如何生成 source map。
 ### 开发环境
@@ -332,10 +345,10 @@ resolve: {
 ```
 [参考链接](https://webpack.docschina.org/configuration/resolve/#resolve-alias)
 ### extensions
-自动解析指定扩展名文件。（数组中指定格式文件导入时可不带扩展名）。
+自动解析指定扩展名文件。使数组中指定格式文件导入时可不带扩展名。（因为会覆盖默认数组，所以得添加js、css否则导入模块可能无法解析，导致报错。）
 ```
 resolve: {
-    extensions: ['*', '.vue', '.jsx']
+    extensions: ['.vue', '.jsx', '.js', '.css']
 }
 ```
 [参考链接](https://webpack.docschina.org/configuration/resolve/#resolve-extensions)
@@ -346,7 +359,7 @@ resolve: {
     modules: [path.resolve(__dirname, '../src'), "node_modules"]
 }
 ```
-[参考链接](https://webpack.docschina.org/configuration/resolve/#resolve-modules
+[参考链接](https://webpack.docschina.org/configuration/resolve/#resolve-modules)
 ## externals
 配置全局变量，防止将某些 import 的包(package)打包到 bundle中，而是在运行时(runtime)再去从外部获取这些扩展依赖。
 ```
@@ -371,6 +384,37 @@ externals: {
 ```
 optimization: {
     minimize: true
+}
+```
+<div id="chunkBetter">自定义配置</div>
+```
+optimization: {
+    minimizer: [
+        // 优化js文件
+        new TerserPlugin({
+            // 过滤已压缩的文件
+            chunkFilter: (chunk) => {
+                if (/\.min\.js$/.test(chunk.name)) {
+                    return false
+                }
+                return true
+            },
+            // 启用多进程压缩
+            parallel: true
+        }),
+        // 用于优化css文件
+        new OptimizeCssAssetsPlugin({
+            assetNameRegExp: /\.css$/g,
+            cssProcessorOptions: {
+                safe: true, // 避免 cssnano 重新计算 z-index
+                autoprefixer: { disable: true }, // 禁止移除带前缀的样式
+                discardComments: {
+                    removeAll: true // 移除注释
+                }
+            },
+            canPrint: false // 禁止打印log
+        })
+    ],
 }
 ```
 #### optimization.noEmitOnErrors 
@@ -415,10 +459,11 @@ optimization: {
 }
 ```
 ### <div id="dllPlugin">编译优化</div>
-dll第三方链接库打包配置
-```
-webpack.dll.config.js
+dll第三方链接库打包配置 
 
+webpack.dll.config.js  
+
+```
 module.exports = {
     mode: 'development',
     entry: {
@@ -444,9 +489,11 @@ module.exports = {
     ]
 }
 ```
-添加dll文件映射，并以标签形式插入到生成的html文件中。
+添加dll文件映射，并以标签形式插入到生成的html文件中。  
+
+webpack.dev.config.js  
+
 ```
-webpack.dev.config.js
 plugins:[
     // 映射dll文件夹下的vendor.manifest.json
     new webpack.DllReferencePlugin({
@@ -464,7 +511,7 @@ plugins:[
     })
 ]
 ```
-### <div id="hotLoad">热重载</div>
+### <div id="hotLoad">热重载、热替换</div>
 文件改动后，以最小的代价改变页面被改变的区域。尽可能保留改动文件前的页面状态。
 #### 本地服务与文件编译、监控
 主要通过express与webpack-dev-middleware实现。  
@@ -493,9 +540,11 @@ app.get("*", (req, res, next) =>{
 app.listen(config.dev.port, function() {
 
 ```
-#### 热重载
+#### 热重载、热替换
 主要通过webpack-hot-middleware、HotModuleReplacementPlugin插件实现。  
-server.js
+
+server.js  
+
 ```
 const express = require('express')
 const webpack = require('webpack')
@@ -527,8 +576,10 @@ app.listen(config.dev.port, function() {
     console.log(`项目启动：http://localhost:${config.dev.port}\n`);
 });
 ```
-webpack.dev.config.js  
-entry中client.js的参数为webpack-hot-middleware的配置项。也可直接在server.js的webpack-hot-middleware配置项中配置。
+entry中client.js的参数为webpack-hot-middleware的配置项。也可直接在server.js的webpack-hot-middleware配置项中配置。  
+
+webpack.dev.config.js   
+
 ```
 {
     entry: ['webpack-hot-middleware/client.js?path=/__what&timeout=20000&reload=true', './src/index.js'],
@@ -538,12 +589,102 @@ entry中client.js的参数为webpack-hot-middleware的配置项。也可直接�
     ]
 }
 ```
+### <div id="cache">缓存优化</div>
+线上环境通过配置HashedModuleIdsPlugin插件，实现修改业务代码不影响第三方库（vendor）hash值的变化，实现浏览器缓存复用。
+
+webpack.prod.config.js   
+
+```
+plugins: [
+    new webpack.HashedModuleIdsPlugin()
+]
+```
+#### cache-loader
+缓存无需经常编译打包的体积大的loader。
+### shimming（全局变量模块化）
+#### <div id="provide">全局模块方法按需加载</div>
+配合tree-shaking实现只加载lodash的join方法，其他方法剔除出打包代码。
+```
+plugins: [
+  new webpack.ProvidePlugin({
+    join: ['lodash', 'join']
+  })
+]
+
+```
+#### 模块this指向问题
+某些模块this指向window，但在commonJS中this指向module.exports，因此打包时需要将this重新绑定回window。
+```
+module: {
+ rules: [
+   {
+     test: require.resolve('module.js'),
+     use: 'imports-loader?this=>window'
+   }
+ ]
+},
+```
+#### 全局变量作为模块导出 
+
+模块 module.js  
+
+```
+var file = 'blah.txt';
+var helpers = {
+  test: function() { console.log('test something'); },
+  parse: function() { console.log('parse something'); }
+}
+```
+
+webpack.config.js  
+
+```
+modules: {
+    rules: [
+        {
+         test: require.resolve('globals.js'),
+         use: 'exports-loader?file,parse=helpers.parse'
+        }
+    ]
+}
+```
+
+引用src/index.js  
+
+```
+import { file, parse } from './module.js'
+```
+
+[参考链接](https://www.webpackjs.com/guides/shimming/#shimming-%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F)  
+
 ### 生成统计数据文件
 ```
 webpack --profile --json > compilation-stats.json
 ```
 生成有关于模块的统计数据的JSON文件。生成文件可以通过webpack可视化工具生成统计图表。  
-[参考链接](https://webpack.docschina.org/api/stats/)
+[参考链接](https://webpack.docschina.org/api/stats/)  
+#### webpack-bundle-analyzer 
+通过此插件对chunk实现可视化结构，分析chunk组成部分，优化代码。
+```
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+module.exports = {
+    plugins: [
+        new BundleAnalyzerPlugin({
+            // 分析模式，server、static、disabled
+            // server开启本地服务、static生成html文件、disabled生成json文件
+            analyzerMode: 'server',
+            // server模式下服务ip
+            analyzerHost: '127.0.0.1',
+            // server模式下端口
+            analyzerPort: 2266,
+            // static模式下html生成路径，相对于output.path
+            reportFilename: 'log/report.html',
+            // 在默认浏览器自动打开报告
+            openAnalyzer: true
+        })
+    ]
+}
+```
 ### 日志管理
 [参考资料](https://webpack.docschina.org/configuration/stats/)
 ```

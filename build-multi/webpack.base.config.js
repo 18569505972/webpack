@@ -1,19 +1,20 @@
 const path = require('path')
 const webpack = require('webpack')
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
-const config = require('../config/index')
+const config = require('../config/index-multi')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 // const fs = require('fs')
 // fs.exists('', function(exists) {
 //   console.log(exists ? "目录存在" : "目录不存在");
 // });
 module.exports = (mode) => {
-    let devMode = mode !== 'production'?'dev':'build'
+    let devMode = mode !== 'production' ? 'dev' : 'build'
     return {
         context: path.resolve(__dirname, '..'),
-        entry: config[devMode].bundleRootPath,
+        entry: config[devMode].entryPath,
         output: {
-            filename: '[name].[hash:8].js',
-            chunkFilename: '[name].[hash:8].js',
+            // dev模式下无需生成hash，优化开发模式下编译效率
+            filename: devMode === 'dev' ? 'js/[name].js' : 'js/[name].[chunkhash:8].js',
+            chunkFilename: devMode === 'dev' ? 'js/[name].js' : 'js/[name].[chunkhash:8].js',
             path: config.build.outputPath,
             publicPath: config[devMode].staticAssetsPath
         },
@@ -24,9 +25,8 @@ module.exports = (mode) => {
             // 解析模块时优先搜索src
             modules: [path.resolve(__dirname, '../src'), "node_modules"],
             // 自动解析扩展，导入时可不带扩展名
-            extensions: ['*', '.vue', '.jsx', '.js', '.css']
+            extensions: ['.vue', '.jsx', '.js', '.css']
         },
-        stats: 'errors-only',
         module: {
             rules: [{
                 test: /\.js$/,
@@ -37,7 +37,8 @@ module.exports = (mode) => {
                 test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
                 loader: 'url-loader',
                 options: {
-                    limit: 5120, //限制5k
+                    //限制5k
+                    limit: 5120, 
                     name: 'images/[name].[hash:7].[ext]'
                 }
             }, {
@@ -52,7 +53,11 @@ module.exports = (mode) => {
         plugins: [
             new webpack.ProvidePlugin({
                 _: 'lodash'
-            })
+            }),
+            new CopyWebpackPlugin([{
+                from: './src/static',
+                to: './static'
+            }])
         ]
     }
 }

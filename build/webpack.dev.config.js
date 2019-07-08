@@ -34,7 +34,8 @@ module.exports = merge(base('development'), {
     plugins: [
         // 实现热重载刷新浏览器
         new webpack.HotModuleReplacementPlugin(),
-        new OpenBrowserPlugin({ url: `http://localhost:${config.dev.port}` }), // 自动打开浏览器
+        // 自动打开浏览器
+        new OpenBrowserPlugin({ url: `http://localhost:${config.dev.port}` }), 
         // 映射
         new webpack.DllReferencePlugin({
             manifest: require(config.dll.manifestPath)

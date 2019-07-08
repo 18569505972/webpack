@@ -15,9 +15,13 @@ app.use(webpackDevMiddleware(compiler, {
     stats: statsObj,
     lazy: false,
     watchOptions: {
-    	ignored: /node_modules/    // 忽略监听
+        // 忽略监听
+    	ignored: /node_modules/, 
+        // 轮询模式下，每2秒检查一次是否更新   
+        poll: 2000    
     },
-    publicPath: devConfig.output.publicPath, // 使用打包输出配置
+    // 使用打包输出配置
+    publicPath: devConfig.output.publicPath, 
 }));
 // 热重载
 app.use(require("webpack-hot-middleware")(compiler, {

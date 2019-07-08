@@ -1,8 +1,11 @@
 {
-  "index.css": "http:localhost:8888/0.bdce093f1cec60b7d4cf.css",
-  "index.js": "http:localhost:8888/index.bdce093f.js",
-  "runtime.js": "http:localhost:8888/runtime.bdce093f.js",
+  "index.js": "http:localhost:8888/index.52e66ea1.js",
+  "runtime.js": "http:localhost:8888/runtime.8dc32637.js",
+  "styles.css": "http:localhost:8888/styles.63c8dfef.css",
+  "styles.js": "http:localhost:8888/styles.6b8cf864.js",
+  "vendors~index.js": "http:localhost:8888/vendors~index.cf4a9a5d.js",
   "fonts/common.scss": "http:localhost:8888/fonts/V100020.76ffc9b.TTF",
   "images/common.scss": "http:localhost:8888/images/1.144b9ca.jpg",
-  "index.html": "http:localhost:8888/index.html"
+  "index.html": "http:localhost:8888/index.html",
+  "static/icon.ico": "http:localhost:8888/static/icon.ico"
 }

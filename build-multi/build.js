@@ -1,6 +1,6 @@
 const webpack = require('webpack')
 const path = require('path')
-const config = require('../config/index')
+const config = require('../config/index-multi')
 const statsObj = require('./stats')
 // 引入webpack配置文件
 const prodConfig = require('./webpack.prod.config');

@@ -1,39 +1,36 @@
-@font-face{
-	font-family:'myfont';
-	font-weight:bolder;
-	font-style:normal;
-	src:url(../fonts/V100020.TTF)
+@font-face {
+    font-family: 'myfont';
+    font-weight: bolder;
+    font-style: normal;
+    src: url(../fonts/V100020.TTF)
 }
-body{
-	color: #F00;
-	font-family: 'myfont';
-	background:#000;
-	height: 100px;
-	width: 100%;
-	#app{
-		height:100px;
-		width:100px;
-		background:#F00;
-		animation:appact 1s linear infinite;
-	}
-	.bg {
-		width: 100px;
-		height:200px;
-		background:url(../images/bg.jpg) 0 0 no-repeat;
-		background-size: 100% 100%;
-	}
-	.continue{
-		width: 100px;
-		height:50px;
-		background:url(../images/continue.png) 0 0 no-repeat;
-		background-size: 100% 100%;
-	}
-	@keyframes appact {
-		0%{
-			transform:translate3d(0,0,0);
-		}
-		100%{
-			transform:translate3d(500px,0,0);
-		}
-	}
+
+body {
+    height: 100px;
+    width: 100%;
+    #app {
+        height: 100px;
+        width: 100%;
+        font-size: 30px;
+        #block {
+            width: 100px;
+            background: #F00;
+            height: 100px;
+            animation: appact 1s linear infinite;
+        }
+        @keyframes appact {
+            0% {
+                transform: translate3d(0, 0, 0);
+            }
+            100% {
+                transform: translate3d(500px, 0, 0);
+            }
+        }
+    }
+    .continue {
+        width: 220px;
+        height: 329.5px;
+        background: url(../images/1.jpg) 0 0 no-repeat;
+        background-size: 100% 100%;
+    }
 }
