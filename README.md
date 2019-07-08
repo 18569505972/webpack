@@ -386,7 +386,7 @@ optimization: {
     minimize: true
 }
 ```
-<div id="chunkBetter">自定义配置</div>
+<h5 id="chunkBetter">自定义配置</h5>  
 ```
 optimization: {
     minimizer: [

@@ -31,14 +31,14 @@ fragment.appendChild(dom)
 new Promise((resolve, reject) => {
     // img图片测试
     dom = new Image()
-    dom.setAttribute('src', './images/2.jpg')
     dom.onload = () => {
         fragment.appendChild(dom)
         resolve()
     }
+    dom.setAttribute('src', require('./images/2.jpg'))
 }).then(() => {
     dom = document.createElement('h5')
-    dom.innerHTML = '回调2加载完成'
+    dom.innerHTML = 'promise加载完成'
     fragment.appendChild(dom)
     document.querySelector("#app").appendChild(fragment)
 })
