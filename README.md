@@ -1,5 +1,5 @@
 # webpack
-webpack环境配置
+webpack4+前端自动化部署环境搭建
 # 项目启动
 ```
 // 拉取远程库
@@ -29,6 +29,159 @@ npm run mulbuild
 // 生成chunk统计json文件
 npm run statistics
 
+```
+# 项目目录
+```
+│  .babelrc                 // babel转换规则
+│  .gitignore
+│  compilation-stats.json   // 打包模块统计文件
+│  package.json      // 依赖包
+│
+├─build   // 单页webpack打包配置目录
+│      build.js  // 单页线上打包入口
+│      devServer.js  // 单页开发环境打包入口
+│      stats.js  // 单页日志管理
+│      webpack.base.config.js  // webpack基础编译配置
+│      webpack.dev.config.js   // 单页webpack开发编译配置
+│      webpack.dll.config.js   // 单页第三方链接库打包配置
+│      webpack.prod.config.js  // 单页线上打包配置
+│
+├─build-multi  // 多页webpack打包配置目录
+│      build.js  // 多页线上打包入口
+│      devServer.js  // 多页开发环境打包入口
+│      stats.js  // 多页日志管理
+│      webpack.base.config.js  // webpack基础编译配置
+│      webpack.dev.config.js   // 多页webpack开发编译配置
+│      webpack.dll.config.js   // 多页第三方链接库打包配置
+│      webpack.prod.config.js  // 多页线上打包配置
+│
+├─config
+│      index-multi.js   // 多页webpack配置参数
+│      index.js         // 单页页webpack配置参数
+│
+├─dist  // 项目打包输出目录
+│  ├─bundle  // 单页chunk打包目录
+│  │  │  index.52e66ea1.js  // 单页项目业务代码
+│  │  │  index.html  // 单页html模板
+│  │  │  manifest.json  // 单页文件映射
+│  │  │  runtime.8dc32637.js  // 单页运行时文件
+│  │  │  styles.63c8dfef.css  // 单页样式文件
+│  │  │  styles.6b8cf864.js   // 样式chunk
+│  │  │  vendors~index.cf4a9a5d.js  // 第三方插件chunk
+│  │  │
+│  │  ├─fonts  // 单页字体打包目录
+│  │  │      V100020.76ffc9b.TTF
+│  │  │
+│  │  ├─images  // 单页图片打包目录
+│  │  │      1.144b9ca.jpg
+│  │  │
+│  │  └─static  // 单页无需编译的静态资源打包目录
+│  │          icon.ico
+│  │
+│  ├─dll  // 单页dll打包目录
+│  │      vendor.dll.js  // 分离第三方链接库代码
+│  │      vendor.manifest.json  // 第三方链接库映射文件
+│  │
+│  ├─multiBundle
+│  │  │  manifest.json  // 多页打包文件映射
+│  │  │  page1.html  // 多页page1页面
+│  │  │  page2.html  // 多页page2页面
+│  │  │
+│  │  ├─css  // 多页css打包目录
+│  │  │      common.d2e99091.css
+│  │  │      page1.80dbf81a.css
+│  │  │      page2.8f4d8020.css
+│  │  │
+│  │  ├─fonts  // 多页字体打包目录
+│  │  │      1.c9f5865.TTF
+│  │  │      V100020.76ffc9b.TTF
+│  │  │
+│  │  ├─images  // 多页图片打包目录
+│  │  │      1.cf00228.jpg
+│  │  │      1.db3c078.png
+│  │  │      2.95bc5c7.jpg
+│  │  │      2.a88854a.jpg
+│  │  │      basketball.0b073ad.png
+│  │  │      football.f0c70dd.png
+│  │  │
+│  │  ├─js   // 多页chunk打包目录
+│  │  │      common.d132d118.js
+│  │  │      page1.780c814f.js
+│  │  │      page2.3cb1ec7a.js
+│  │  │      runtime~page1.0dc435c8.js
+│  │  │      runtime~page2.ea945d36.js
+│  │  │      vendors~page1~page2.67a3f97f.js
+│  │  │      vendors~page2.fb327e50.js
+│  │  │
+│  │  └─static  // 多页无需编译的静态资源打包目录
+│  │          icon.ico
+│  │
+│  └─multiDll   // 多页dll打包目录
+│          vendor.dll.js
+│          vendor.manifest.json
+│
+└─src
+    │  index.html  // 单页html模板
+    │  page1.html  // 多页page1模板
+    │  page2.html  // 多页page2模板
+    │
+    ├─multiPage
+    │  │  common.scss  // 多页公共样式
+    │  │
+    │  ├─page1  // 多页page1页面
+    │  │  │  index.js  // 多页page1入口文件
+    │  │  │
+    │  │  ├─fonts
+    │  │  │      V100020.TTF
+    │  │  │
+    │  │  ├─images
+    │  │  │      1.jpg
+    │  │  │      2.jpg
+    │  │  │      basketball.png
+    │  │  │      football.png
+    │  │  │      tennis.png
+    │  │  │      volleyball.png
+    │  │  │
+    │  │  └─styles
+    │  │          common.scss
+    │  │
+    │  └─page2   // 多页page2页面
+    │      │  index.js  // page2入口文件
+    │      │
+    │      ├─fonts
+    │      │      1.ttf
+    │      │      V100020.TTF
+    │      │
+    │      ├─images
+    │      │      1.png
+    │      │      2.jpg
+    │      │      basketball.png
+    │      │      football.png
+    │      │      tennis.png
+    │      │      volleyball.png
+    │      │
+    │      └─styles
+    │              common.scss
+    │
+    ├─singlePage    // 单页项目目录
+    │  │  index.js  // 单页入口js
+    │  │
+    │  ├─fonts  // 单页字体文件
+    │  │      V100020.TTF
+    │  │
+    │  ├─images   // 单页图片文件
+    │  │      1.jpg
+    │  │      2.jpg
+    │  │
+    │  ├─scripts  // 单页脚本文件
+    │  │      hashTest.js
+    │  │      index.js
+    │  │      test.js
+    │  │
+    │  └─styles  // 单页样式文件
+    │          common.scss
+    │
+    └─static   // 无需编译的静态资源文件
 ```
 # 基础概念
 ## context

@@ -1,7 +1,7 @@
 {
   "name": "webpack",
   "version": "1.0.0",
-  "description": "webpack环境配置",
+  "description": "webpack4+前端自动化部署环境搭建",
   "private": true,
   "scripts": {
     "build": "node ./build/build.js",
