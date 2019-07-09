@@ -14,14 +14,14 @@ body {
             width: 100px;
             background: #F00;
             height: 100px;
-            animation: appact 1s linear infinite;
+            animation: appact 3s linear infinite;
         }
         @keyframes appact {
             0% {
                 transform: translate3d(0, 0, 0);
             }
             100% {
-                transform: translate3d(500px, 0, 0);
+                transform: translate3d(100vw, 0, 0);
             }
         }
     }
@@ -34,8 +34,8 @@ body {
         z-index:-1;
     }
     .continue {
-        width: 220px;
-        height: 329.5px;
+        width: 146px;
+        height: 220px;
         background: url(../images/1.jpg) 0 0 no-repeat;
         background-size: 100% 100%;
     }

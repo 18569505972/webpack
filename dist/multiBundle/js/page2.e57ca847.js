@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[3],{"0elh":function(n,e,c){},Iq5F:function(n,e,c){"use strict";c.r(e);c("0elh"),c("UHEl"),c("wfkH"),c("JCdq");var o=document.createElement("div");o.innerHTML="<h3>当前环境：".concat("线上环境","</h3>"),document.body.appendChild(o)}},[["Iq5F",5,1,6,0]]]);

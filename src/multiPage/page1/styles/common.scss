@@ -6,26 +6,48 @@
 }
 
 body {
-    height: 100px;
     width: 100%;
     #app {
-        height: 100px;
         width: 100%;
         font-size: 30px;
         #block {
             width: 100px;
-            background: #F00;
             height: 100px;
-            animation: appact 1s linear infinite;
+            background: url(../images/basketball.png) 0 0 no-repeat;
+            background-size: 100% 100%;
+            animation: appact 3s linear infinite;
         }
         @keyframes appact {
             0% {
-                transform: translate3d(0, 0, 0);
+                transform: translate3d(0, 0, 0) rotate(0);
+            }
+            10% {
+                transform: translate3d(10vw, 4vw, 0) rotate(180deg);
+            }
+            20% {
+                transform: translate3d(20vw, 8vw, 0) rotate(360deg);
+            }
+            30% {
+                transform: translate3d(30vw, 12vw, 0) rotate(540deg);
+            }
+            40% {
+                transform: translate3d(40vw, 16vw, 0) rotate(720deg);
+            }
+            50% {
+                transform: translate3d(50vw, 20vw, 0) rotate(900deg);
             }
             100% {
-                transform: translate3d(500px, 0, 0);
+                transform: translate3d(100vw, 0, 0);
             }
         }
+    }
+    img {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index:-1;
     }
     .continue {
         width: 220px;

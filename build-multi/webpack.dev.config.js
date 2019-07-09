@@ -11,6 +11,7 @@ let createHtmlList = Object.keys(htmlTemplateList).map((key, index, arr) => {
     return new htmlWebpackPlugin({
         template: config.build.htmlTemplate[key],
         filename: `${key}.html`,
+        chunks: config.dev.chunkList[key],
         hash: false,
         inject: true
     })
@@ -44,7 +45,7 @@ let webpackConfig = {
         // 实现热重载刷新浏览器
         new webpack.HotModuleReplacementPlugin(),
         // 自动打开浏览器
-        new OpenBrowserPlugin({ url: `http://localhost:${config.dev.port}` }), 
+        new OpenBrowserPlugin({ url: `http://localhost:${config.dev.port}/page1.html` }), 
         // 映射
         new webpack.DllReferencePlugin({
             manifest: require(config.dll.manifestPath)
@@ -56,7 +57,7 @@ webpackConfig.plugins = webpackConfig.plugins.concat(createHtmlList)
 webpackConfig.plugins.push(
     new AddAssetHtmlPlugin({
         // html插入文件路径
-        filepath: require.resolve('../dist/dll/vendor.dll.js')
+        filepath: require.resolve('../dist/multiDll/vendor.dll.js')
     })
 )
 module.exports = merge(base('development'), webpackConfig)

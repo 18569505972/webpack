@@ -30,8 +30,11 @@ app.use(require("webpack-hot-middleware")(compiler, {
     reload: true,
     heartbeat: 2000
 }));
-app.get("*", (req, res, next) => {
+app.get("/page1.html", (req, res, next) => {
     res.sendFile(path.join(__dirname, "../dist/multiBundle/page1.html"));
+})
+app.get("/page2.html", (req, res, next) => {
+    res.sendFile(path.join(__dirname, "../dist/multiBundle/page2.html"));
 })
 // 服务端口 8888.
 app.listen(config.dev.port, function() {

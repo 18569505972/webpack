@@ -35,8 +35,13 @@ module.exports = {
             page1: ['webpack-hot-middleware/client.js?path=/__what&timeout=20000', path.resolve(__dirname, '../src/multiPage/page1/index.js')],
             page2: ['webpack-hot-middleware/client.js?path=/__what&timeout=20000', path.resolve(__dirname, '../src/multiPage/page2/index.js')]
         },
+        // 模板引入chunk
+        chunkList: {
+            page1:['page1'],
+            page2:['page2']
+        },
         // 静态资源路径
-        staticAssetsPath: '/',
+        staticAssetsPath: '',
         // sourceMap模式
         devtool: '#cheap-module-eval-source-map'
     },
@@ -44,7 +49,7 @@ module.exports = {
         // 链接库manifest
         manifestPath: path.resolve(__dirname, '../dist/multiDll/vendor.manifest.json'),
         // 链接库列表
-        dllList: ['lodash', 'axios'],
+        dllList: ['lodash'],
         // 链接库包目录
         dllOutputPath: path.resolve(__dirname, '../dist/multiDll')
     }

@@ -146,7 +146,7 @@ let webpackConfig = {
         new cleanWebpackPlugin(), 
         new ManifestPlugin(),
         new MiniCssExtractPlugin({
-            filename: '/css/[name].[contenthash:8].css',
+            filename: 'css/[name].[contenthash:8].css',
         }),
         new webpack.HashedModuleIdsPlugin(),
     ]

@@ -12,16 +12,20 @@ import hashTest from './scripts/hashTest.js'
 let env = process.env.NODE_ENV === 'development' ? '开发环境' : '线上环境'
 let fragment = document.createDocumentFragment()
 // 当前环境
-let dom = document.createElement('h3')
+let dom = document.createElement('h5')
 let text = document.createTextNode(`当前环境：${env}`)
 dom.appendChild(text)
+fragment.appendChild(dom)
+// 单页
+dom = document.createElement('h4')
+dom.innerHTML = '单页'
 fragment.appendChild(dom)
 // 别名测试
 dom = test()
 fragment.appendChild(dom)
 // css前缀测试
 dom = document.createElement('div')
-dom.className = 'block'
+dom.setAttribute('id', 'block')
 fragment.appendChild(dom)
 // css图片测试
 dom = document.createElement('div')
