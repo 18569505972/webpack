@@ -1,11 +1,17 @@
 {
-  "index.js": "http:localhost:8888/index.52e66ea1.js",
-  "runtime.js": "http:localhost:8888/runtime.8dc32637.js",
-  "styles.css": "http:localhost:8888/styles.63c8dfef.css",
-  "styles.js": "http:localhost:8888/styles.6b8cf864.js",
-  "vendors~index.js": "http:localhost:8888/vendors~index.cf4a9a5d.js",
-  "fonts/common.scss": "http:localhost:8888/fonts/V100020.76ffc9b.TTF",
-  "images/common.scss": "http:localhost:8888/images/1.144b9ca.jpg",
-  "index.html": "http:localhost:8888/index.html",
-  "static/icon.ico": "http:localhost:8888/static/icon.ico"
+  "index.js": "./index.1c3260fd.js",
+  "index.js.map": "./index.1c3260fd.js.map",
+  "runtime.js": "./runtime.e40c53bb.js",
+  "runtime.js.map": "./runtime.e40c53bb.js.map",
+  "styles.css": "./styles.16b6183e.css",
+  "styles.js": "./styles.72c91065.js",
+  "styles.css.map": "./styles.16b6183e.css.map",
+  "styles.js.map": "./styles.72c91065.js.map",
+  "vendors~index.js": "./vendors~index.359d96c9.js",
+  "vendors~index.js.map": "./vendors~index.359d96c9.js.map",
+  "fonts/common.scss": "./fonts/V100020.76ffc9b.TTF",
+  "images/common.scss": "./images/1.144b9ca.jpg",
+  "images/2.jpg": "./images/2.90d3ec2.jpg",
+  "index.html": "./index.html",
+  "static/icon.ico": "./static/icon.ico"
 }

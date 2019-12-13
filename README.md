@@ -220,7 +220,7 @@ entry: () => new Promise((resolve) => resolve(['./main.js', './common.js']))
 output:{
 	filename:'[name].[chunkhash:8].js',  //输出包名,添加hash值
     chunkFilename: '[name].[chunkhash:8].js', // 异步加载模块输出名配置
-	path:resolve(__dirname,'dist'),  //打包目录
+	path:resolve(__dirname,'dist'),  //打包目录，必须为绝对路径
 	publicPath:"http://static.com"  //静态资源域名，如图片url
 }
 ```

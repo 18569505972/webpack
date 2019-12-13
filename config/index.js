@@ -12,9 +12,9 @@ module.exports = {
         // 生成包目录
         outputPath: path.resolve(__dirname, '../dist/bundle'),
         // 静态资源路径
-        staticAssetsPath: 'http:localhost:8888/',
+        staticAssetsPath: './',
         // sourceMap模式
-        devtool: 'none'
+        devtool: 'source-map'
     },
     dev: {
         // 本地服务端口号

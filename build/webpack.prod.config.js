@@ -31,6 +31,7 @@ module.exports = merge(base('production'), {
         }]
     },
     optimization: {
+        minimize: false,
         minimizer: [
             // 优化js文件
             new TerserPlugin({
@@ -42,7 +43,8 @@ module.exports = merge(base('production'), {
                     return true
                 },
                 // 启用多进程压缩
-                parallel: true
+                parallel: true,
+                sourceMap: true
             }),
             // 用于优化css文件
             new OptimizeCssAssetsPlugin({

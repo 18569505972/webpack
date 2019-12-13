@@ -10,7 +10,8 @@
     "statistics": "webpack --progress --profile --json > compilation-stats.json --config ./build/webpack.prod.config.js",
     "mulbuild": "node ./build-multi/build.js",
     "muldev": "node ./build-multi/devServer.js",
-    "muldll": "webpack --config ./build-multi/webpack.dll.config.js"
+    "muldll": "webpack --config ./build-multi/webpack.dll.config.js",
+    "minjs": "node ./minjs/build.js"
   },
   "repository": {
     "type": "git",
