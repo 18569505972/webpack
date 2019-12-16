@@ -3,7 +3,10 @@ import './styles/common.scss'
 // es6扩展表达式打包测试
 import { arr } from './scripts/index.js'
 // 别名测试
-import test from '@/singlePage/scripts/test.js'
+import('@/singlePage/scripts/test.js').then(test => {
+    // 别名测试
+    dom = test()
+})
 // 第三方插件打包测试
 import lodash from 'lodash'
 // hash缓存测试
@@ -20,8 +23,6 @@ fragment.appendChild(dom)
 dom = document.createElement('h4')
 dom.innerHTML = '单页'
 fragment.appendChild(dom)
-// 别名测试
-dom = test()
 fragment.appendChild(dom)
 // css前缀测试
 dom = document.createElement('div')

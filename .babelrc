@@ -5,6 +5,7 @@
          ]
      ],
      "plugins": [
+         "dynamic-import-webpack",
          [
              "@babel/plugin-transform-runtime",
              {
