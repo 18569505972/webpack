@@ -185,19 +185,22 @@ npm run statistics
 ```
 # 基础概念
 ## context
-定义entry入口和HtmlWebpackPlugin插件绝对路径。
+定义entry入口和HtmlWebpackPlugin插件绝对路径，默认为根目录。
 ## entry  
 作用：指定一个或多个入口文件，作为打包的起始索引。  
-默认：./src。  
+默认打包目录：./src。  
 ### 单页配置（指定一个入口文件） 
 ```
-// 单个文件打包成一个bundle.js
+// 数组、字符串形式定义入口，默认生成入口chunkname为main
+entry：'./main.js'
+entry：['./main.js','./lodash.js']
+// 单个文件打包成一个app.js
 entry：{
-	main：'./main.js'
+	app：'./main.js'
 }
-// 多个文件打包成一个bundle.js
+// 多个文件打包成一个app.js
 entry：{
-	main：['./main.js','./lodash.js']
+	app：['./main.js','./lodash.js']
 }
 ```
 ### 多页配置（多个入口文件）
@@ -218,50 +221,110 @@ entry: () => new Promise((resolve) => resolve(['./main.js', './common.js']))
 ### output配置
 ```
 output:{
-	filename:'[name].[chunkhash:8].js',  //输出包名,添加hash值
-    chunkFilename: '[name].[chunkhash:8].js', // 异步加载模块输出名配置
-	path:resolve(__dirname,'dist'),  //打包目录，必须为绝对路径
-	publicPath:"http://static.com"  //静态资源域名，如图片url
+    /*
+        [hash]：webpack打包所有资源生成的hash；
+        [chunkhash]：指代当前chunk内容的hash，chunkhash只与自身内容有关，便于客户端缓存；
+        [id]：指代当前chunk的id；
+        [query]：指代filename配置项中的query；
+    */
+    // 入口输出包名,添加hash值
+	filename:'[name].[chunkhash:8].js',
+    // 按需加载模块输出名配置
+    chunkFilename: '[name].[chunkhash:8].js',
+    // 打包目录，必须为绝对路径
+	path:resolve(__dirname,'dist'), 
+    // 请求静态资源域名，如异步加载的js、css，css中的图片、字体等
+	publicPath:"http://static.com"
 }
 ```
 ## module
 模块配置
 ### noParse
 略过解析某类文件。
-### 常用loader
-作用：webpack只能解释编译js和json文件，所以需要配置loader去处理vue、jsx、css、img、字体、视频、语音等格式的文件，将其转换为JavaScript。  
+### loader
+作用：webpack只能解释编译js和json文件，所以需要配置loader去预处理vue、jsx、css、img、字体、视频、语音等格式的文件，将其转换为JavaScript。  
 #### 必须属性
 test：匹配被转换文件的格式。  
 use：进行转换时用到的loader。  
+include：loader只对指定目录下的模块生效，值为字符串或正则表达式。
+exclude：loader排除指定目录下的模块，优先级高于include，值为字符串或正则表达式。 
+```
+// 只处理src目录下的非lib子目录内的css文件
+rules:[
+    {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+        include: /src/,
+        exclude: /src\/lib/
+    }
+]
+``` 
+resource：被加载者，上面的loader基本配置规则都是针对resource的。  
+issuer：加载者。
+```
+// index.js为issuer，style.css为resource
+// index.js
+import './style.css'
+
+// 只有src/pages下的js文件引用的css，这条规则才会启用。  
+rules:[
+    {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+        include: /src/,
+        exclude: /src\/lib/,
+        issuer: {
+            test: /\.js/,
+            include: /src/pages
+        }
+    }
+]
+```
+enforce：强制指定某一loader执行顺序，默认为normal，值为pre表示当前loader在所有loader之前执行，值为post表示值在所有loader之后执行。  
 #### css-loader、style-loader
 css-loader：允许在js中import一个css文件，会将css文件当成一个模块引入到js文件中。  
 style-loader：使用style标签将css-loader内部样式注入到我们的HTML页面。  
 #### postcss-loader
-配合autoprefixer插件用于处理浏览器前缀。
+接收样式源码，交给样式插件处理样式，配合autoprefixer插件用于处理浏览器前缀。
 #### sass-loader node-sass
-node-sass把sass编译成css,sass-loader 是webpack的一个loader。webpack中二者结合实现对sass的转化。再配合css-loader将css样式转换为js模块。
+node-sass把sass编译成css,sass-loader 是webpack的一个loader。webpack中二者结合实现对sass的转化。再配合css-loader将css样式转换为js模块。  
+sourceMap：开启css的sourceMap。  
 ```
-{
-    test: /\.scss$/,
-    use: [
-        "css-loader",
-        {
-            loader: "postcss-loader",
-            options: {
-                plugins: [
-                    require("autoprefixer")
-                ]
+rules:[
+    {
+        test: /\.scss$/,
+        use: [
+            {
+                loader:"css-loader",
+                options: {
+                    sourceMap: true
+                } 
+            },
+            {
+                loader: "postcss-loader",
+                options: {
+                    sourceMap: true,
+                    plugins: [
+                        require("autoprefixer")
+                    ]
+                }
+            },
+            {
+                loader:"sass-loader",
+                options: {
+                    sourceMap: true
+                } 
             }
-        },
-        "sass-loader"
-    ]
-}
+        ]
+    }
+]
 ```
 #### less-loader
 实现less到css转化，再配合css-loader将css样式转换为js模块。
 #### url-loader、file-loader
 name参数:将文件输入到指定地址，\[name\]代表文件名，\[hash:7\]代表7位hash，\[ext\]代表文件扩展名。     
-limt:表示文件大小限制（单位byte），小于指定值的文件以file-loader进行base64转码打包。
+limt:表示文件大小限制（单位byte），小于指定值的文件以file-loader进行base64转码打包。  
+publicPath: 覆盖output.publicPath。  
 ```
 rules:[
     {
@@ -285,20 +348,85 @@ rules:[
 #### babel-loader
 转换js文件中的es6代码  
 ```
-{
-    test: /\.js$/,
-    exclude: /node_modules/,   //排除转换node_modules
-    loader: "babel-loader",
-    include: /src/            // 只转化src目录下js文件
-},
+rules:[
+    {
+        test: /\.js$/,
+        //排除转换node_modules
+        exclude: /node_modules/,   
+        // 只转化src目录下js文件
+        include: /src/,            
+        loader: "babel-loader",
+        options: {
+            // 开启编译缓存，防止二次编译重复打包未改变过的模块，加快打包速度
+            cacheDirectory: true,
+            presets: [
+             [
+                 "@babel/preset-env", {
+                    // 禁用babel模块转化语句，防止babel将ES6 Module转化为CommonJS，以便于webpack做tree-shaking
+                    modules: false,
+                    // useBuiltIns须开启corejs3.x+版本
+                    corejs: 3,
+                    // 使用polyfill向低版本注入不支持的新特性时，按需注入
+                    useBuiltIns: 'usage'
+                 },
+             ]
+         ],
+        }
+    }
+]
+```
+#### html-loader
+将html文件转换为字符串并格式化，使得html片段可通过js加载进来。  
+```
+rules:[
+    {
+        test: /\.html$/,
+        use: { loader: 'html-loader' }
+    }
+]
 ```
 #### worker-loader
 将js文件注册为Web Worker。
 ```
-{
-    test: /\.worker\.js$/,
-    use: { loader: 'worker-loader' }
+rules:[
+    {
+        test: /\.worker\.js$/,
+        use: { loader: 'worker-loader' }
+    }
+]
+```
+#### 自定义loader
+```
+loaders/helloworld-loader/index.js
+var loaderUtils = require('loader-utils')
+// content文件内容
+module.exports = function(content) {
+    // 启用缓存，加快打包速度
+    if(this.cacheable) {
+        this.cacheable()
+    }
+    // 获取loader配置项
+    var options = loaderUtils.getOptions(this) || {};
+    console.log(options.console)
+    return "/\/\ hello world \n" + content
 }
+
+webpack.base.conf.js
+// 配置自定义loader加载目录
+resolveLoader: {
+    modules: ['node_modules', path.resolve(__dirname, '../loaders')]
+},
+rules:[
+    {
+        test: /\.js$/,
+        use: [{ 
+            loader: 'helloworld-loader',
+            options: {
+                console: 'Hello World!!!'
+            }
+        }]
+    }
+]
 ```
 ## plugin
 各种各样的插件主要配合webpack对打包项目进行打包优化、资源管理、注入环境变量。
@@ -316,7 +444,9 @@ new htmlWebpackPlugin({
 })
 ```
 ### mini-css-extract-plugin
-此插件将CSS提取到单独的文件中。它为每个包含CSS的JS文件创建一个CSS文件。可打包异步加载的css模块。（不支持开发环境HRM，建议用于线上环境）
+此插件将CSS提取到单独的文件中。它为每个包含CSS的JS文件创建一个CSS文件。可打包按需加载的css模块。（不支持开发环境HRM，建议用于线上环境）,webpack4以前为extract-text-webpack-plugin。  
+#### 配置项
+publicPath：指定按需加载的link路径。  
 ```
 {
     entry: {
@@ -328,7 +458,13 @@ new htmlWebpackPlugin({
             {
                 test: /\.scss$/,
                 use: [
-                    MiniCssExtractPlugin.loader,
+                    {
+                        loader:MiniCssExtractPlugin.loader,
+                        options:{
+                            // 指定按需加载的link路径
+                            publicPath: './'
+                        }
+                    },
                     "css-loader",
                     "sass-loader"
                 ]
@@ -339,8 +475,9 @@ new htmlWebpackPlugin({
     optimization:{
         splitChunks:{
             cacheGroups:{
+                // 提取所有css文件到styles
                 styles: {
-                    name: 'styles',       // 提取所有css文件到styles
+                    name: 'styles',
                     test: /\.css$/,
                     chunks: 'all',
                     enforce: true,
@@ -364,7 +501,7 @@ new htmlWebpackPlugin({
     plugins:[
          new MiniCssExtractPlugin({
             filename: '[name].[hash].css',       // css块名
-            chunkFilename: '[id].[hash].css'     // 异步加载的css块名
+            chunkFilename: '[name].[chunkhash].css'     // 按需加载的css块名
         })
     ]
 }
@@ -713,7 +850,8 @@ const compiler = webpack(devConfig);
 // 中间件配置
 app.use(webpackDevMiddleware(compiler, {
     quiet: true,  //向控制台显示任何内容 
-    publicPath: path.resolve(__dirname, '../dist'), // 使用打包输出配置
+    // 开发环境静态资源服务器路径
+    publicPath: path.resolve(__dirname, '../dist')
 }));
 // 返回请求页面
 app.get("*", (req, res, next) =>{
@@ -742,7 +880,8 @@ const compiler = webpack(devConfig);
 // 中间件配置
 app.use(webpackDevMiddleware(compiler, {
     quiet: true,  //向控制台显示任何内容 
-    publicPath: path.resolve(__dirname, '../dist'), // 使用打包输出配置
+    // 开发环境静态资源服务器路径
+    publicPath: path.resolve(__dirname, '../dist'),
 }));
 // 热重载
 app.use(require("webpack-hot-middleware")(compiler,{

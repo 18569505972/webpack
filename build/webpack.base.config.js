@@ -27,12 +27,28 @@ module.exports = (mode) => {
             // 自动解析扩展，导入时可不带扩展名
             extensions: ['.vue', '.jsx', '.js', '.css']
         },
+        // 配置自定义loader加载目录
+        resolveLoader: {
+            modules: ['node_modules', path.resolve(__dirname, '../loaders')]
+        },
         module: {
             rules: [{
                 test: /\.js$/,
                 exclude: /node_modules/,
                 loader: "babel-loader",
-                include: /src/
+                include: /src/,
+                options: {
+                    cacheDirectory: true
+                }
+            }, {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: "helloworld-loader",
+                include: /src/,
+                options: {
+                    console: 'hello world!!!'
+                },
+                enforce: 'post'
             }, {
                 test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
                 loader: 'url-loader',

@@ -2,6 +2,13 @@
      "presets": [
          [
              "@babel/preset-env",
+             {
+                // 禁用babel模块转化语句，防止babel将ES6 Module转化为CommonJS，以便于webpack做tree-shaking
+                modules: false,
+                corejs: 3,
+                // 使用polyfill向低版本注入不支持的新特性时，按需注入
+                useBuiltIns: 'usage'
+             }
          ]
      ],
      "plugins": [
@@ -9,7 +16,8 @@
          [
              "@babel/plugin-transform-runtime",
              {
-                 "corejs": 2 // 按需运行时转化
+                 // 按需运行时转化
+                 "corejs": 2
              }
          ]
      ],
